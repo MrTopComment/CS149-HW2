@@ -171,7 +171,7 @@ public class ProcessScheduling
                     //throughput = processes / total time [here = adding up the burst time total]
                     throughPutSJF = throughPutSJF + (tempSort.get(0).expectedTotalRunTime);
             	}
-            	if(array.get(j).arrivalTime <= array.get(i).completionTime) //Rest of the processes
+            	if(array.get(j).arrivalTime <= array.get(i).completionTime && array.get(j).firstIteration == false) //Rest of the processes
             	{
             		averageTurnAroundTimeSJF = averageTurnAroundTimeSJF + //turnaround = completion - arrival
                             ( (array.get(j).completionTime) - (array.get(j).arrivalTime) ); 
@@ -181,6 +181,7 @@ public class ProcessScheduling
                             ( (array.get(j).executionTime) - (array.get(j).arrivalTime) );
                     //throughput = processes / total time [here = adding up the burst time total]
                     throughPutSJF = throughPutSJF + (tempSort.get(j).expectedTotalRunTime);
+                    array.get(j).firstIteration = true;
             	}
             }
         }
