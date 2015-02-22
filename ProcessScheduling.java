@@ -160,7 +160,7 @@ public class ProcessScheduling
             //***SJF Algorithm***
             for(int j = i+1; j < array.size(); j++) //compare the rest of the processes
             {
-            	if(array.get(i+1).arrivalTime <= array.get(i).completionTime) //compare arrival to completion time
+            	if(array.get(j).arrivalTime <= array.get(i).completionTime) //compare arrival to completion time
             	{
             		averageTurnAroundTimeSJF = averageTurnAroundTimeSJF + //turnaround = completion - arrival
                             ( (array.get(i).completionTime) - (array.get(i).arrivalTime) ); 
