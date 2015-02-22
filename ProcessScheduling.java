@@ -15,8 +15,8 @@ public class ProcessScheduling
          * @processNumber, number of processes, can be 50 or 100, technically positive int values
          * @quantaRR,time slice, can be 1 -2 quanta of time
          */
-        processNumber = Integer.parseInt(args[0]);
-        int quantaRR = Integer.parseInt(args[1]);
+        processNumber = Integer.parseInt(args[0]);;
+        int quantaRR = Integer.parseInt(args[1]);;
         
         //make processes
         for(int i= 0 ;i< processNumber ;i++)
@@ -119,7 +119,60 @@ public class ProcessScheduling
     
     public static void SJF(ArrayList<Process> arrayOG)
     {
+    	//make a SORTED copy for nondestructive editing
+        ArrayList<Process> tempSort = new ArrayList<Process>(arrayOG);
         
+        //sort array by arrival time --> tempSort = sorted queue
+        for (int k = 1; k < tempSort.size(); k++)
+        {
+            //insertion sort
+            float temp = tempSort.get(k).arrivalTime;
+            int m;
+            for (m = k - 1; m >= 0 && temp < tempSort.get(m).arrivalTime; m--)
+            {
+                tempSort.get(m + 1).arrivalTime = tempSort.get(m).arrivalTime;
+                tempSort.get(m + 1).arrivalTime = temp;
+            }
+        }
+        ArrayList<Process> array = new ArrayList<Process>(tempSort);
+        float currentTimeSJF = 0;
+        int i;
+        for(i = 0; i < array.size(); i++)
+        {
+        	if(array.get(i).firstIteration == false)
+        	{
+        		array.get(i).firstIteration = true;
+        		array.get(i).executionTime = currentTimeSJF;
+        	}
+        	//set current time to @completion time for process = current time + burst time
+            //set completion time = current time(already set as completion time), set burst to zero
+            currentTimeSJF = currentTimeSJF + array.get(i).expectedTotalRunTime;
+            array.get(i).completionTime = currentTimeSJF + array.get(i).expectedTotalRunTime;
+            array.get(i).expectedTotalRunTime = 0;
+            //set each burst time to 0, tempSort still holds info though
+            //non-preemptive = no need to exit.
+            
+            float averageTurnAroundTimeSJF = 0;
+            float averageWaitingTimeSJF = 0;
+            float averageResponseTimeSJF = 0;
+            float throughPutSJF = 0;
+            
+            //***SJF Algorithm***
+            for(int j = i+1; j < array.size(); j++) //compare the rest of the processes
+            {
+            	if(array.get(i+1).arrivalTime <= array.get(i).completionTime) //compare arrival to completion time
+            	{
+            		averageTurnAroundTimeSJF = averageTurnAroundTimeSJF + //turnaround = completion - arrival
+                            ( (array.get(i).completionTime) - (array.get(i).arrivalTime) ); 
+                    averageWaitingTimeSJF = averageWaitingTimeSJF + //wait = completion - OG array(burst time)
+                            ( (array.get(i).completionTime) - (tempSort.get(i).expectedTotalRunTime) );
+                    averageResponseTimeSJF = averageResponseTimeSJF + //reponse = execution - arrival
+                            ( (array.get(i).executionTime) - (array.get(i).arrivalTime) );
+                    //throughput = processes / total time [here = adding up the burst time total]
+                    throughPutSJF = throughPutSJF + (tempSort.get(i).expectedTotalRunTime);
+            	}
+            }
+        }
     }
     
     public static void roundRobin(ArrayList<Process> arrayOG, float timeSlice)
