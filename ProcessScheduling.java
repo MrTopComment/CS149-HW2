@@ -30,7 +30,6 @@ public class ProcessScheduling
             /* random generator-->arrival time, expected total run time
              * @arrival time, float from 0 - 200 quanta
              * @ expected total run time, float from 0.1 - 10 quanta
-             * one instance of each to map to each process
              */
             float random1 = (Math.abs((int) System.nanoTime())%101); 
             random1 = (random1/100)*200;
@@ -67,9 +66,8 @@ public class ProcessScheduling
         //keeping track of the current time
         float currentTimeFCFS = 0;
         //sort array by arrival time --> tempSort = sorted queue
-        for (int k = 1; k < tempSort.size(); k++)
+        for (int k = 1; k < tempSort.size(); k++)  //insertion sort
         {
-            //insertion sort
             float temp = tempSort.get(k).arrivalTime;
             int m;
             for (m = k - 1; m >= 0 && temp < tempSort.get(m).arrivalTime; m--)
@@ -157,9 +155,8 @@ public class ProcessScheduling
         //keeping track of the current time
         float currentTimeSJF = 0;
         //sort array by arrival time --> tempSort = sorted queue
-        for (int k = 1; k < tempSort.size(); k++)
+        for (int k = 1; k < tempSort.size(); k++)       //insertion sort
         {
-            //insertion sort
             float temp = tempSort.get(k).arrivalTime;
             int m;
             for (m = k - 1; m >= 0 && temp < tempSort.get(m).arrivalTime; m--)
@@ -199,32 +196,32 @@ public class ProcessScheduling
         }
         
         //go through array for calculations and do averages [average variables] then print
-        float averageTurnAroundTimeFCFS = 0;
-        float averageWaitingTimeFCFS = 0;
-        float averageResponseTimeFCFS = 0;
-        float throughPutFCFS = 0;
+        float averageTurnAroundTimeSJF = 0;
+        float averageWaitingTimeSJF = 0;
+        float averageResponseTimeSJF = 0;
+        float throughPutSJF = 0;
         for (int j = 0; j < array.size(); j++)
         {
             //calculate times and then add them to the total
-            averageTurnAroundTimeFCFS = averageTurnAroundTimeFCFS + //turnaround = completion - arrival
+            averageTurnAroundTimeSJF = averageTurnAroundTimeSJF + //turnaround = completion - arrival
                     ( (array.get(j).completionTime) - (array.get(j).arrivalTime) ); 
-            averageWaitingTimeFCFS = averageWaitingTimeFCFS + //wait = completion - OG array(burst time)
+            averageWaitingTimeSJF = averageWaitingTimeSJF + //wait = completion - OG array(burst time)
                     ( (array.get(j).completionTime) - (tempSort.get(j).expectedTotalRunTime) -
                      array.get(j).arrivalTime);
-            averageResponseTimeFCFS = averageResponseTimeFCFS + //reponse = execution - arrival
+            averageResponseTimeSJF = averageResponseTimeSJF + //reponse = execution - arrival
                     ( (array.get(j).executionTime) - (array.get(j).arrivalTime) );
             //throughput = processes / total time [here = adding up the burst time total]
-            throughPutFCFS = throughPutFCFS + (tempSort.get(j).expectedTotalRunTime);
+            throughPutSJF = throughPutSJF + (tempSort.get(j).expectedTotalRunTime);
         }
         //divide total by size for averages
-        averageTurnAroundTimeFCFS = averageTurnAroundTimeFCFS / processNumber;
-        averageWaitingTimeFCFS = averageWaitingTimeFCFS / processNumber;
-        averageResponseTimeFCFS = averageResponseTimeFCFS / processNumber;
-        throughPutFCFS = processNumber / throughPutFCFS;
-        System.out.println("Average turnaround time SJF: " + averageTurnAroundTimeFCFS);
-        System.out.println("Average waiting time SJF: " + averageWaitingTimeFCFS);
-        System.out.println("Average reponse time SJF: " + averageResponseTimeFCFS);
-        System.out.println("Average throughput SJF: " + throughPutFCFS);
+        averageTurnAroundTimeSJF = averageTurnAroundTimeSJF / processNumber;
+        averageWaitingTimeSJF = averageWaitingTimeSJF / processNumber;
+        averageResponseTimeSJF = averageResponseTimeSJF / processNumber;
+        throughPutSJF = processNumber / throughPutSJF;
+        System.out.println("Average turnaround time SJF: " + averageTurnAroundTimeSJF);
+        System.out.println("Average waiting time SJF: " + averageWaitingTimeSJF);
+        System.out.println("Average reponse time SJF: " + averageResponseTimeSJF);
+        System.out.println("Average throughput SJF: " + throughPutSJF);
     }
     
     public static void roundRobin(ArrayList<Process> arrayOG, float timeSlice)
