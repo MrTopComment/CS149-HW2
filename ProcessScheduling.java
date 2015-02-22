@@ -15,8 +15,8 @@ public class ProcessScheduling
          * @processNumber, number of processes, can be 50 or 100, technically positive int values
          * @quantaRR,time slice, can be 1 -2 quanta of time
          */
-        processNumber = Integer.parseInt(args[0]);;
-        int quantaRR = Integer.parseInt(args[1]);;
+        processNumber = 50;
+        int quantaRR = 2;
         
         //make processes
         for(int i= 0 ;i< processNumber ;i++)
@@ -136,8 +136,11 @@ public class ProcessScheduling
         }
         ArrayList<Process> array = new ArrayList<Process>(tempSort);
         float currentTimeSJF = 0;
-        int i;
-        for(i = 0; i < array.size(); i++)
+        float averageTurnAroundTimeSJF = 0;
+        float averageWaitingTimeSJF = 0;
+        float averageResponseTimeSJF = 0;
+        float throughPutSJF = 0;
+        for(int i = 0; i < array.size(); i++)
         {
         	if(array.get(i).firstIteration == false)
         	{
@@ -152,10 +155,6 @@ public class ProcessScheduling
             //set each burst time to 0, tempSort still holds info though
             //non-preemptive = no need to exit.
             
-            float averageTurnAroundTimeSJF = 0;
-            float averageWaitingTimeSJF = 0;
-            float averageResponseTimeSJF = 0;
-            float throughPutSJF = 0;
             
             //***SJF Algorithm***
             for(int j = i+1; j < array.size(); j++) //compare the rest of the processes
@@ -163,16 +162,27 @@ public class ProcessScheduling
             	if(array.get(j).arrivalTime <= array.get(i).completionTime) //compare arrival to completion time
             	{
             		averageTurnAroundTimeSJF = averageTurnAroundTimeSJF + //turnaround = completion - arrival
-                            ( (array.get(i).completionTime) - (array.get(i).arrivalTime) ); 
+                            ( (array.get(j).completionTime) - (array.get(j).arrivalTime) ); 
                     averageWaitingTimeSJF = averageWaitingTimeSJF + //wait = completion - OG array(burst time)
-                            ( (array.get(i).completionTime) - (tempSort.get(i).expectedTotalRunTime) );
+                            ( (array.get(j).completionTime) - (tempSort.get(j).expectedTotalRunTime) );
                     averageResponseTimeSJF = averageResponseTimeSJF + //reponse = execution - arrival
-                            ( (array.get(i).executionTime) - (array.get(i).arrivalTime) );
+                            ( (array.get(j).executionTime) - (array.get(j).arrivalTime) );
                     //throughput = processes / total time [here = adding up the burst time total]
                     throughPutSJF = throughPutSJF + (tempSort.get(i).expectedTotalRunTime);
             	}
             }
         }
+        //divide total by size for averages
+        averageTurnAroundTimeSJF = averageTurnAroundTimeSJF / processNumber;
+        averageWaitingTimeSJF = averageWaitingTimeSJF / processNumber;
+        averageResponseTimeSJF = averageResponseTimeSJF / processNumber;
+        throughPutSJF = processNumber / throughPutSJF;
+        
+        System.out.println("");
+        System.out.println("Average turnaround time SJF: " + averageTurnAroundTimeSJF);
+        System.out.println("Average waiting time SJF: " + averageWaitingTimeSJF);
+        System.out.println("Average reponse time SJF: " + averageResponseTimeSJF);
+        System.out.println("Average throughput SJF: " + throughPutSJF);
     }
     
     public static void roundRobin(ArrayList<Process> arrayOG, float timeSlice)
