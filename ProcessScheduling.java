@@ -52,8 +52,18 @@ public class ProcessScheduling
         /* input@array <arrival time, expected total run time, completion time, 
          *              first iteration flag, first iteration time>
          */
-        //make a SORTED copy for nondestructive editing
-        ArrayList<Process> tempSort = new ArrayList<Process>(arrayOG);
+        //make a SORTED copy for nondestructive editing of main copy
+        ArrayList<Process> tempSort = new ArrayList<Process>();
+        for (int z = 0; z < arrayOG.size(); z++)
+        {
+            Process process = new Process(0,0,0,false,0);
+            tempSort.add(process);
+            tempSort.get(z).arrivalTime = arrayOG.get(z).arrivalTime;
+            tempSort.get(z).expectedTotalRunTime = arrayOG.get(z).expectedTotalRunTime;
+            tempSort.get(z).completionTime = arrayOG.get(z).completionTime;
+            tempSort.get(z).firstIteration = arrayOG.get(z).firstIteration;
+            tempSort.get(z).executionTime = arrayOG.get(z).executionTime;
+        }
         //keeping track of the current time
         float currentTimeFCFS = 0;
         //sort array by arrival time --> tempSort = sorted queue
@@ -68,7 +78,17 @@ public class ProcessScheduling
                 tempSort.get(m + 1).arrivalTime = temp;
             }
         }
-        ArrayList<Process> array = new ArrayList<Process>(tempSort); //array = editable queue
+        ArrayList<Process> array = new ArrayList<Process>(); //array = editable queue
+        for (int y = 0; y < tempSort.size(); y++)
+        {
+            Process process = new Process(0,0,0,false,0);
+            array.add(process);
+            array.get(y).arrivalTime = arrayOG.get(y).arrivalTime;
+            array.get(y).expectedTotalRunTime = arrayOG.get(y).expectedTotalRunTime;
+            array.get(y).completionTime = arrayOG.get(y).completionTime;
+            array.get(y).firstIteration = arrayOG.get(y).firstIteration;
+            array.get(y).executionTime = arrayOG.get(y).executionTime;
+        }
         //iterate through the new array---(FCFS logic for scheduling)
         //no CPU scheduler switching necessary for FCFS  
         for (int i = 0; i < array.size(); i++)
@@ -79,10 +99,10 @@ public class ProcessScheduling
                 array.get(i).firstIteration = true;
                 array.get(i).executionTime = currentTimeFCFS; //first iteration time = currentTime
             }
-            //set current time to @completion time for process = current time + burst time
             //set completion time = current time(already set as completion time), set burst to zero
+            //set current time to @completion time for process = current time + burst time
             currentTimeFCFS = currentTimeFCFS + array.get(i).expectedTotalRunTime;
-            array.get(i).completionTime = currentTimeFCFS + array.get(i).expectedTotalRunTime;
+            array.get(i).completionTime = currentTimeFCFS;
             array.get(i).expectedTotalRunTime = 0;
             //set each burst time to 0, tempSort still holds info though
             //non-preemptive = no need to exit.
@@ -95,12 +115,12 @@ public class ProcessScheduling
         float throughPutFCFS = 0;
         for (int j = 0; j < array.size(); j++)
         {
-            System.out.println(tempSort.get(j).expectedTotalRunTime);
             //calculate times and then add them to the total
             averageTurnAroundTimeFCFS = averageTurnAroundTimeFCFS + //turnaround = completion - arrival
                     ( (array.get(j).completionTime) - (array.get(j).arrivalTime) ); 
             averageWaitingTimeFCFS = averageWaitingTimeFCFS + //wait = completion - OG array(burst time)
-                    ( (array.get(j).completionTime) - (tempSort.get(j).expectedTotalRunTime) );
+                    ( (array.get(j).completionTime) - (tempSort.get(j).expectedTotalRunTime) -
+                     array.get(j).arrivalTime);
             averageResponseTimeFCFS = averageResponseTimeFCFS + //reponse = execution - arrival
                     ( (array.get(j).executionTime) - (array.get(j).arrivalTime) );
             //throughput = processes / total time [here = adding up the burst time total]
@@ -119,7 +139,92 @@ public class ProcessScheduling
     
     public static void SJF(ArrayList<Process> arrayOG)
     {
+        /* input@array <arrival time, expected total run time, completion time, 
+         *              first iteration flag, first iteration time>
+         */
+        //make a SORTED copy for nondestructive editing of main copy
+        ArrayList<Process> tempSort = new ArrayList<Process>();
+        for (int z = 0; z < arrayOG.size(); z++)
+        {
+            Process process = new Process(0,0,0,false,0);
+            tempSort.add(process);
+            tempSort.get(z).arrivalTime = arrayOG.get(z).arrivalTime;
+            tempSort.get(z).expectedTotalRunTime = arrayOG.get(z).expectedTotalRunTime;
+            tempSort.get(z).completionTime = arrayOG.get(z).completionTime;
+            tempSort.get(z).firstIteration = arrayOG.get(z).firstIteration;
+            tempSort.get(z).executionTime = arrayOG.get(z).executionTime;
+        }
+        //keeping track of the current time
+        float currentTimeSJF = 0;
+        //sort array by arrival time --> tempSort = sorted queue
+        for (int k = 1; k < tempSort.size(); k++)
+        {
+            //insertion sort
+            float temp = tempSort.get(k).arrivalTime;
+            int m;
+            for (m = k - 1; m >= 0 && temp < tempSort.get(m).arrivalTime; m--)
+            {
+                tempSort.get(m + 1).arrivalTime = tempSort.get(m).arrivalTime;
+                tempSort.get(m + 1).arrivalTime = temp;
+            }
+        }
+        ArrayList<Process> array = new ArrayList<Process>(); //array = editable queue
+        for (int y = 0; y < tempSort.size(); y++)
+        {
+            Process process = new Process(0,0,0,false,0);
+            array.add(process);
+            array.get(y).arrivalTime = arrayOG.get(y).arrivalTime;
+            array.get(y).expectedTotalRunTime = arrayOG.get(y).expectedTotalRunTime;
+            array.get(y).completionTime = arrayOG.get(y).completionTime;
+            array.get(y).firstIteration = arrayOG.get(y).firstIteration;
+            array.get(y).executionTime = arrayOG.get(y).executionTime;
+        }
+        //iterate through the new array---(SJF logic for scheduling)
+        //need to manage queue for SJF job switching  
+        for (int i = 0; i < array.size(); i++)
+        {
+            //check first iteration flag-->if false-->true and set start time--> else if true - ignore
+            if (array.get(i).firstIteration == false)
+            {
+                array.get(i).firstIteration = true;
+                array.get(i).executionTime = currentTimeSJF; //first iteration time = currentTime
+            }
+            //set completion time = current time(already set as completion time), set burst to zero
+            //set current time to @completion time for process = current time + burst time
+            currentTimeSJF = currentTimeSJF + array.get(i).expectedTotalRunTime;
+            array.get(i).completionTime = currentTimeSJF;
+            array.get(i).expectedTotalRunTime = 0;
+            //set each burst time to 0, tempSort still holds info though
+            //non-preemptive = no need to exit.
+        }
         
+        //go through array for calculations and do averages [average variables] then print
+        float averageTurnAroundTimeFCFS = 0;
+        float averageWaitingTimeFCFS = 0;
+        float averageResponseTimeFCFS = 0;
+        float throughPutFCFS = 0;
+        for (int j = 0; j < array.size(); j++)
+        {
+            //calculate times and then add them to the total
+            averageTurnAroundTimeFCFS = averageTurnAroundTimeFCFS + //turnaround = completion - arrival
+                    ( (array.get(j).completionTime) - (array.get(j).arrivalTime) ); 
+            averageWaitingTimeFCFS = averageWaitingTimeFCFS + //wait = completion - OG array(burst time)
+                    ( (array.get(j).completionTime) - (tempSort.get(j).expectedTotalRunTime) -
+                     array.get(j).arrivalTime);
+            averageResponseTimeFCFS = averageResponseTimeFCFS + //reponse = execution - arrival
+                    ( (array.get(j).executionTime) - (array.get(j).arrivalTime) );
+            //throughput = processes / total time [here = adding up the burst time total]
+            throughPutFCFS = throughPutFCFS + (tempSort.get(j).expectedTotalRunTime);
+        }
+        //divide total by size for averages
+        averageTurnAroundTimeFCFS = averageTurnAroundTimeFCFS / processNumber;
+        averageWaitingTimeFCFS = averageWaitingTimeFCFS / processNumber;
+        averageResponseTimeFCFS = averageResponseTimeFCFS / processNumber;
+        throughPutFCFS = processNumber / throughPutFCFS;
+        System.out.println("Average turnaround time SJF: " + averageTurnAroundTimeFCFS);
+        System.out.println("Average waiting time SJF: " + averageWaitingTimeFCFS);
+        System.out.println("Average reponse time SJF: " + averageResponseTimeFCFS);
+        System.out.println("Average throughput SJF: " + throughPutFCFS);
     }
     
     public static void roundRobin(ArrayList<Process> arrayOG, float timeSlice)
