@@ -140,6 +140,7 @@ public class ProcessScheduling
         float averageWaitingTimeSJF = 0;
         float averageResponseTimeSJF = 0;
         float throughPutSJF = 0;
+        
         for(int i = 0; i < array.size(); i++)
         {
         	if(array.get(i).firstIteration == false)
@@ -157,9 +158,20 @@ public class ProcessScheduling
             
             
             //***SJF Algorithm***
-            for(int j = i+1; j < array.size(); j++) //compare the rest of the processes
+            for(int j = i+1; j < array.size(); j++)
             {
-            	if(array.get(j).arrivalTime <= array.get(i).completionTime) //compare arrival to completion time
+            	if(i == 0) //calculations for first process
+            	{
+            		averageTurnAroundTimeSJF = averageTurnAroundTimeSJF + //turnaround = completion - arrival
+                            ( (array.get(0).completionTime) - (array.get(0).arrivalTime) ); 
+                    averageWaitingTimeSJF = averageWaitingTimeSJF + //wait = completion - OG array(burst time)
+                            ( (array.get(0).completionTime) - (tempSort.get(0).expectedTotalRunTime) );
+                    averageResponseTimeSJF = averageResponseTimeSJF + //reponse = execution - arrival
+                            ( (array.get(0).executionTime) - (array.get(0).arrivalTime) );
+                    //throughput = processes / total time [here = adding up the burst time total]
+                    throughPutSJF = throughPutSJF + (tempSort.get(0).expectedTotalRunTime);
+            	}
+            	if(array.get(j).arrivalTime <= array.get(i).completionTime) //Rest of the processes
             	{
             		averageTurnAroundTimeSJF = averageTurnAroundTimeSJF + //turnaround = completion - arrival
                             ( (array.get(j).completionTime) - (array.get(j).arrivalTime) ); 
@@ -168,7 +180,7 @@ public class ProcessScheduling
                     averageResponseTimeSJF = averageResponseTimeSJF + //reponse = execution - arrival
                             ( (array.get(j).executionTime) - (array.get(j).arrivalTime) );
                     //throughput = processes / total time [here = adding up the burst time total]
-                    throughPutSJF = throughPutSJF + (tempSort.get(i).expectedTotalRunTime);
+                    throughPutSJF = throughPutSJF + (tempSort.get(j).expectedTotalRunTime);
             	}
             }
         }
