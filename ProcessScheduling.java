@@ -19,8 +19,13 @@ public class ProcessScheduling
          * @processNumber, number of processes, can be 50 or 100, technically positive int values
          * @quantaRR,time slice, can be 1 -2 quanta of time
          */
+<<<<<<< HEAD
         processNumber = Integer.parseInt(args[0]);
         int quantaRR = Integer.parseInt(args[1]);
+=======
+        processNumber = 50;
+        int quantaRR = 2;
+>>>>>>> 8a28c5880f9c55de4161b916a4a0c0f3e7b76658
         
         //make processes
         for(int i= 0 ;i< processNumber ;i++)
@@ -176,6 +181,7 @@ public class ProcessScheduling
                 tempSort.get(m + 1).arrivalTime = temp;
             }
         }
+<<<<<<< HEAD
         ArrayList<Process> array = new ArrayList<Process>(); //array = editable queue
         for (int y = 0; y < tempSort.size(); y++)
         {
@@ -257,6 +263,57 @@ public class ProcessScheduling
                     lineSJF.add(array.get(jobLastAddedIndex + 1));
                     jobLastAddedIndex++;
                 }
+=======
+        ArrayList<Process> array = new ArrayList<Process>(tempSort);
+        float currentTimeSJF = 0;
+        float averageTurnAroundTimeSJF = 0;
+        float averageWaitingTimeSJF = 0;
+        float averageResponseTimeSJF = 0;
+        float throughPutSJF = 0;
+        
+        for(int i = 0; i < array.size(); i++)
+        {
+        	if(array.get(i).firstIteration == false)
+        	{
+        		array.get(i).firstIteration = true;
+        		array.get(i).executionTime = currentTimeSJF;
+        	}
+        	//set current time to @completion time for process = current time + burst time
+            //set completion time = current time(already set as completion time), set burst to zero
+            currentTimeSJF = currentTimeSJF + array.get(i).expectedTotalRunTime;
+            array.get(i).completionTime = currentTimeSJF + array.get(i).expectedTotalRunTime;
+            array.get(i).expectedTotalRunTime = 0;
+            //set each burst time to 0, tempSort still holds info though
+            //non-preemptive = no need to exit.
+            
+            
+            //***SJF Algorithm***
+            for(int j = i+1; j < array.size(); j++)
+            {
+            	if(i == 0) //calculations for first process
+            	{
+            		averageTurnAroundTimeSJF = averageTurnAroundTimeSJF + //turnaround = completion - arrival
+                            ( (array.get(0).completionTime) - (array.get(0).arrivalTime) ); 
+                    averageWaitingTimeSJF = averageWaitingTimeSJF + //wait = completion - OG array(burst time)
+                            ( (array.get(0).completionTime) - (tempSort.get(0).expectedTotalRunTime) );
+                    averageResponseTimeSJF = averageResponseTimeSJF + //reponse = execution - arrival
+                            ( (array.get(0).executionTime) - (array.get(0).arrivalTime) );
+                    //throughput = processes / total time [here = adding up the burst time total]
+                    throughPutSJF = throughPutSJF + (tempSort.get(0).expectedTotalRunTime);
+            	}
+            	if(array.get(j).arrivalTime <= array.get(i).completionTime && array.get(j).firstIteration == false) //Rest of the processes
+            	{
+            		averageTurnAroundTimeSJF = averageTurnAroundTimeSJF + //turnaround = completion - arrival
+                            ( (array.get(j).completionTime) - (array.get(j).arrivalTime) ); 
+                    averageWaitingTimeSJF = averageWaitingTimeSJF + //wait = completion - OG array(burst time)
+                            ( (array.get(j).completionTime) - (tempSort.get(j).expectedTotalRunTime) );
+                    averageResponseTimeSJF = averageResponseTimeSJF + //reponse = execution - arrival
+                            ( (array.get(j).executionTime) - (array.get(j).arrivalTime) );
+                    //throughput = processes / total time [here = adding up the burst time total]
+                    throughPutSJF = throughPutSJF + (tempSort.get(j).expectedTotalRunTime);
+                    array.get(j).firstIteration = true;
+            	}
+>>>>>>> 8a28c5880f9c55de4161b916a4a0c0f3e7b76658
             }
         }
         //divide total by size for averages
@@ -264,6 +321,11 @@ public class ProcessScheduling
         averageWaitingTimeSJF = averageWaitingTimeSJF / processNumber;
         averageResponseTimeSJF = averageResponseTimeSJF / processNumber;
         throughPutSJF = processNumber / throughPutSJF;
+<<<<<<< HEAD
+=======
+        
+        System.out.println("");
+>>>>>>> 8a28c5880f9c55de4161b916a4a0c0f3e7b76658
         System.out.println("Average turnaround time SJF: " + averageTurnAroundTimeSJF);
         System.out.println("Average waiting time SJF: " + averageWaitingTimeSJF);
         System.out.println("Average reponse time SJF: " + averageResponseTimeSJF);
