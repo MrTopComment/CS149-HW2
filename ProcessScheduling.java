@@ -128,12 +128,13 @@ public class ProcessScheduling
             averageTurnAroundTimeFCFS = averageTurnAroundTimeFCFS + //turnaround = completion - arrival
                     ( (array.get(j).completionTime) - (array.get(j).arrivalTime) ); 
             averageWaitingTimeFCFS = averageWaitingTimeFCFS + //wait = completion - OG array(burst time)
-                    ( (array.get(j).completionTime) - (tempSort.get(j).expectedTotalRunTime) -
+                    ( (array.get(j).completionTime) - (array.get(j).expectedTotalRunTime) -
                      array.get(j).arrivalTime);
             averageResponseTimeFCFS = averageResponseTimeFCFS + //reponse = execution - arrival
-                    ( (array.get(j).executionTime) - (array.get(j).arrivalTime) );
-            //throughput = processes / total time [here = adding up the burst time total]
-            throughPutFCFS = throughPutFCFS + (tempSort.get(j).expectedTotalRunTime);
+                    ( (array.get(j).executionTime) - (tempSort.get(j).arrivalTime) );
+            //throughput = processes / total time [last job completed - first arrival time]
+            throughPutFCFS = throughPutFCFS + (array.get(array.size() - 1).completionTime 
+                    - array.get(0).arrivalTime);
         }
         //divide total by size for averages
         averageTurnAroundTimeFCFS = averageTurnAroundTimeFCFS / processNumber;
@@ -239,15 +240,18 @@ public class ProcessScheduling
                      currentProcess.arrivalTime);
             averageResponseTimeSJF = averageResponseTimeSJF + //reponse = execution - arrival
                     ( ( currentProcess.executionTime) - (currentProcess.arrivalTime) );
-            //throughput = processes / total time [here = adding up the burst time total]
-            throughPutSJF = throughPutSJF + (currentProcess.expectedTotalRunTime);
-
             //add jobs whose arrival times have already occured to queue, while single core is being used
             for (int k = jobLastAddedIndex + 1; k < array.size() && array.get(k).arrivalTime 
                             <= currentTimeSJF; k++) 
             {
                 lineSJF.add( array.get(k) );
                 jobLastAddedIndex = k;
+                
+                //throughput = processes / total time [last job completion time - first arrivaltime]
+                if (k == array.size() - 1 )
+                {
+                    throughPutSJF = throughPutSJF + (currentProcess.completionTime - array.get(0).arrivalTime);
+                }
             }
             //when the queue is empty, push next in line array items into it
             if (lineSJF.isEmpty()) 
@@ -317,14 +321,10 @@ public class ProcessScheduling
         float averageWaitingTimeRR = 0;
         float averageResponseTimeRR = 0;
         float throughPutRR = 0;
-        //since RR breaks up the burst time into chunks this is a seperate throughput calc
-        for (int t = 0; t < array.size(); t++)
-        {
-            throughPutRR = throughPutRR + array.get(t).expectedTotalRunTime;
-        }
         //iterate through the new array---(RR logic for scheduling)
         //CPU RR scheduler--while not empty keeps it moving, don't have to append to end anymore, just loop
-        while (!array.isEmpty()) {
+        while (!array.isEmpty()) 
+        {
             //gap fixing, bring the process to it's time
             if (currentTimeRR < array.get(0).arrivalTime) 
             {
@@ -380,12 +380,17 @@ public class ProcessScheduling
                         array.get(i).expectedTotalRunTime = (float) 0.00;
                         //garbage collector- once a processes burst time reaches 0
                         //job is done, remove it, then decrement counter
+                        //use size =1 for throughput calc
                         array.remove(i);
                         i--;
                     }
                 }
             }
         }
+        //since RR breaks up the burst time into chunks this is a seperate throughput calc
+        //throughput [last one completion time - first one arrival time]
+        
+        throughPutRR =  currentTimeRR - (tempSort.get(0).arrivalTime);
         //divide total by size for averages
         averageTurnAroundTimeRR = averageTurnAroundTimeRR / processNumber;
         averageWaitingTimeRR = averageWaitingTimeRR / processNumber;
